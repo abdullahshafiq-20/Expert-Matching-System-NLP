@@ -1,0 +1,1382 @@
+2010 IEEE/WIC/ACM International Conference on Web Intelligence and Intelligent Agent Technology
+
+Expertise Matching via Constraint-based Optimization
+Wenbin Tang, Jie Tang, and Chenhao Tan
+Department of Computer Science and Technology, Tsinghua University, China
+{tangwb06,tch06}@mails.tsinghua.edu.cn, jietang@tsinghua.edu.cn
+the combined expertise of all assigned experts could cover
+all aspects of questions (topic coverage).
+The problem has attracted considerable interest from
+different domains. For example, several works have been
+made for conference paper-reviewer assignment by using
+methods such as mining the web [10], latent semantic
+indexing [6], probabilistic topic modeling [14][16], integer
+linear programming [13], minimum cost ﬂow [9] and hybrid
+approach of domain knowledge and matching model[18].
+A few systems [11][5][15] have also developed to help
+proposal-reviewer and paper-reviewer assignment. However,
+most existing methods mainly focus on the matching algorithm, i.e., how to accurately ﬁnd (or rank) the experts
+for each query, but ignore the different constraints or tackle
+the constraints with heuristics, which obviously results in
+an approximate (or even inaccurate) solution. Moreover,
+these methods usually do not consider user feedbacks. On
+the other hand, there are some methods focusing on expert
+ﬁnding. For example, Fang et al. [7] proposed a probabilistic
+model for expert ﬁnding, and Petkova et al. [17] employed
+a hierarchical language model in enterprise corpora. Balog
+et al. [2] employ probabilistic models to study the problem
+of expert ﬁnding, which tries to identify a list of experts
+for a query. However, these methods retrieve experts for
+each query independently, and cannot be directly adapted to
+deal with the expertise matching problem. Thus, several key
+questions arise for expertise matching, i.e., how to design a
+framework for expertise matching to guarantee an optimal
+solution under various constraints? how to develop an online
+algorithm so that it can incorporate user feedbacks in real
+time?
+
+Abstract—Expertise matching, aiming to ﬁnd the alignment between experts and queries, is a common problem
+in many real applications such as conference paper-reviewer
+assignment, product-reviewer alignment, and product-endorser
+matching. Most of existing methods for this problem usually
+ﬁnd “relevant” experts for each query independently by using,
+e.g., an information retrieval method. However, in real-world
+systems, various domain-speciﬁc constraints must be considered. For example, to review a paper, it is desirable that there
+is at least one senior reviewer to guide the reviewing process.
+An important question is: “Can we design a framework to
+efﬁciently ﬁnd the optimal solution for expertise matching under
+various constraints?” This paper explores such an approach by
+formulating the expertise matching problem in a constraintbased optimization framework. Interestingly, the problem can
+be linked to a convex cost ﬂow problem, which guarantees
+an optimal solution under given constraints. We also present
+an online matching algorithm to support incorporating user
+feedbacks in real time. The proposed approach has been evaluated on two different genres of expertise matching problems.
+Experimental results validate the effectiveness of the proposed
+approach.
+Keywords-Expertise matching; Constrained optimization;
+Paper-reviewer assignment
+
+I. I NTRODUCTION
+The fusion of computer technology and human collective
+intelligence has recently emerged as a popular way for users
+to ﬁnd and share information on the internet. For example,
+ChaCha.com, one of the largest mobile search engines, has
+already attracted users to answer over 300 million questions;
+Epinions.com has collected millions of reviews for various
+products. The human-based computation offers a new direction in search with its unique use of human intelligence;
+however, it also poses some brand new challenges. One key
+problem, referred to as expertise matching, is how to align
+human experts with questions (queries)? Straightforward, we
+hope that the human experts who are assigned to answer a
+question have the speciﬁc expertise related to the question.
+But it is obviously insufﬁcient. An ideal matching system
+should also consider various constraints in the real world,
+for example, an expert can only answer a certain number
+of questions (load balance); as the authoritative degree of
+different experts may vary largely, it is desirable that each
+question can be answered/reviewed by at least one senior
+expert (authority balance); a question may be relevant to
+multiple different aspects (topics), thus it is expected that
+978-0-7695-4191-4/10 $26.00 © 2010 IEEE
+DOI 10.1109/WI-IAT.2010.133
+
+Problem Formulation We ﬁrst formulate our problem
+precisely. Given a set of experts V = {vi }, each expert has
+different expertise over all topics. Formally, we assume that
+there are in total T aspects of expertise (called topics) and
+one’s expertise degree on topic
+ z ∈ {1 · · · T } is represented
+as a probability θvi z with z θvi z = 1. Further, given a set
+of queries Q = {qj }, each query is also related to multiple
+topics,
+also represented as a T -dimensional topic distribution
+
+θ
+z qj z = 1, where θqj z is the probability of query qj on
+topic z. Notations are summarized in Table I.
+Given this, our objective is to assign m experts to each
+query by satisfying certain constraints. For a concrete example, an university department has ﬁve teaching staffs and
+34
+
+given constraints. Formally, we denote the set of experts to
+answer query qj as V (qj ) , and the set of queries assigned
+to expert vi as as Q(vi ) . Further, we denote the matching
+score (relevance) between expert vi and query qj as Rij .
+Therefore, a basic objective function can be deﬁned as
+follows
+ 
+Max
+Rij
+(1)
+
+Table I
+N OTATIONS .
+SYMBOL
+M
+N
+T
+V
+Q
+vi
+qj
+θvi z
+θ qj z
+
+DESCRIPTION
+number of experts
+number of queries
+number of topics
+the set of candidate experts
+the set of queries
+one expert
+one query
+the probability of topic z given expert vi
+the probability of topic z given query qj
+
+vi ∈V qj ∈Q(vi )
+
+function can be equivalently written as
+
+The objective
+qj ∈Q
+vi ∈V (qj ) Rij . In different applications, the constraints can be deﬁned in different ways. Here we use several
+general constraints to explain how the proposed framework
+can incorporate the different constraints.
+The ﬁrst constraint is that each query should be assigned
+to exactly m experts. For example, in the paper-reviewer
+assignment task, each paper should be assigned to 3 or 5
+reviewers. This constraint can be directly added into the
+optimization problem. Formally, we have:
+
+ten courses to teach. The topics corresponding to the courses
+(also expertise of the teachers) can be “machine learning”,
+“data mining”, “computational theory”, etc. Each teacher vi
+has different expertise degrees on the topics, characterized
+by θvi and each course qj also has a relevance distribution
+on different topics, characterized by θqj . To assign teachers
+to courses, ideally the assigned teachers’ expertise to each
+course should cover the topic of the course, and all the
+teachers should have a load balance with each other as well.
+
+ST1 : ∀qj ∈ Q, |V (qj )| = m
+
+Contributions In this paper, we formally deﬁne the problem of expertise matching and propose a constraint-based
+optimization framework to solve the problem. Speciﬁcally,
+the expertise matching problem is transformed to a convex
+cost ﬂow problem and the objective is then to ﬁnd a feasible
+ﬂow with minimum cost under certain constraints. We theoretically prove that the proposed framework can achieve an
+optimal solution and develop an efﬁcient algorithm to solve
+it. We conduct experiments on two different genres of tasks:
+conference paper-reviewer assignment and course-teacher
+assignment. Experimental results validate the effectiveness
+and efﬁciency of the proposed approach. We have applied
+the proposed method to help assign reviewers to papers for
+a top conference. Feedbacks from the conference organizers
+conﬁrm the usefulness of the proposed approach.
+
+(2)
+
+The second constraint is called as expert load balance,
+indicating that each expert can only answer a limited number
+of queries. There are two ways to achieve this purpose:
+deﬁne a strict constraint or add a soft penalty to the objective
+function. For strict, we add a constraint indicating that the
+number of assigned queries to every expert vi should be
+equal or larger than a minimum number n1 , but be equal or
+smaller than a maximum number n2 . The strict constraint
+can be written as:
+ST2 (strict): ∀vi ∈ V, n1 ≤ |Q(vi )| ≤ n2
+
+(3)
+
+The other way is to add a soft penalty to the objective
+function (Eq. 1). For example, we can deﬁne a square
+penalty
+as |Q(vi )|2 . By minimizing the sum of the penalty
+
+2
+i |Q(vi )| , we can achieve a soft load balance among all
+experts, i.e.:
+
+soft penalty: Min
+|Q(vi )|2
+(4)
+
+II. T HE C ONSTRAINT- BASED O PTIMIZATION
+F RAMEWORK
+A. Basic Idea
+The main idea of our approach is to formulate this problem in a constraint-based optimization framework. Different
+constraints can be formalized as penalty in the objective
+function or be directly taken as the constraints in the
+optimization solving process. For solving the optimization
+framework, we transform the problem to a convex cost
+network ﬂow problem, and present an efﬁcient algorithm
+which guarantees the optimal solution.
+
+vi ∈V
+
+These two constraints can be also used together. Actually,
+in our experiments, soft penalty method gives better results
+than strict constraint. Combining them together can always
+yield a further improvement.
+The third constraint is called authority balance. In real
+application, experts have different expertise level (authoritative level). Take the paper-reviewer assignment problem
+as an example. Reviewers may be divided into 2 levels:
+senior reviewers and average reviewers. Intuitively, we do
+not expect that all assigned reviewers to a paper are average
+reviewers. It is desirable that the senior reviewers can cover
+all papers to guide (or supervise) the review process. Without
+
+B. The Framework
+Now, we explain the proposed approach in detail. In
+general, our objective can be viewed from two perspectives.
+On the one hand, we try to maximize the relevance between
+experts and queries; on the other hand, we try to satisfy the
+
+35
+
+C. Modeling Multiple Topics
+
+loss of generality, we divide all experts into K levels, i.e.,
+V 1 ∪V 2 ∪· · ·∪V k = V , with V 1 representing experts of the
+highest authoritative level. Similar to expert load balance,
+we can deﬁne a strict constraint like |V 1 ∩ V (qj )| ≥ 1, and
+also add a penalty function to each query qj over the k-level
+experts. Following, we give a simple method to instantiate
+the penalty function:
+Min
+
+K 
+N
+
+
+|V k ∩ V (qj )|2
+
+The goal of topic modeling is to associate each expert vi
+with a vector θvi ∈ RT of T -dimensional topic distribution,
+and to associate each query qj with a vector θqj ∈ RT .
+The topic distribution can be obtained in many different
+ways. For example, in the paper-reviewer assignment problem, each reviewer can select their expertise topics from
+a predeﬁned categories. In addition, we can use statistical
+topic modeling [4][12] to automatically extract topics from
+the input data. In this paper, we use the topic modeling
+approach to initialize the topic distribution of each expert
+and each query.
+To extract the topic distribution, we can consider that
+we have a set of M expert documents and N query
+documents (each representing an expert or a query). An
+expert’s document can be obtained by accumulating the
+content information related to the expert. For example, we
+can combine all publication papers as the expert document of
+a reviewer, thus expert vi ’s document can be represented as
+di = {wij }. Each query can also be viewed as a document.
+Then we can learn these T topic aspects from the collection
+of expert documents and query documents using a topic
+model such as LDA [4]. We use the Gibbs sampling
+algorithm [8] to learn the topic distribution θvi for each
+expert and each query.
+
+(5)
+
+k=1 j=1
+
+The fourth constraint is called topic coverage. Also in
+the paper-reviewer assignment example, typically, we hope
+that the expertise of assigned reviewers to a paper can cover
+all topics of the paper. Our idea here is to deﬁne a reward
+function to capture the coverage degree. Speciﬁcally, the
+reward score is quantiﬁed by the number of times that an
+expert vi has the expertise to answer a query qj on a major
+topic z of this query, i.e.,
+T
+
+
+Max
+
+
+
+I(θqj z > τ1 )I(θvi z > τ2 )
+
+(6)
+
+z=1 vi ∈V (qj )
+
+where I(θqj z > τ1 ) is an indicator function, taking 1 when
+the condition is true or 0 when the condition is false. τ1 and
+τ2 are two thresholds, indicating that we only consider the
+major topics of query qj and expert vi . Intuitively, if every
+aspect of the query is covered by all assigned experts, we
+will have a maximum reward score.
+The last constraint is called COI avoidance. In many
+cases, we need to consider the conﬂict-of-interest (COI)
+problem. For example, an author, of course, should not
+review his own or his coauthors’ paper. This can be accomplished through employing a binary M × N matrix U .
+An element with value of 0, i.e., Uij = 0, represents expert
+vi has the conﬂict-of-interest with query qj . A simple way
+is to multiply the matrix U with the matching score R in
+(Eq.1).
+Finally, by incorporating Eq. 4-6 and the COI matrix U
+into the basic objective function (Eq. 1), we can result in
+the following constrained optimization framework:
+Max
+
+
+
+
+
+Uij Rij −
+
+vi ∈V qj ∈Q(vi )
+
+−β
+
+
+
+(μk
+
+k=1
+2
+
+|Q(vi )| + λ
+
+vi ∈V
+
+s.t.
+
+K
+
+
+T
+ 
+
+N
+
+
+|V
+
+k
+
+D. Pairwise Matching Score
+We employ language model to calculate the pairwise
+matching score. With language model, the matching score
+Rij between expert vi and query
+ qj is interpreted as a
+LM
+probability Rij
+= p(qj |di ) = w∈qj p(w|di ), with
+P (w|di ) =
+
+qj ∈Q z=1 vi ∈V (qj )
+
+·
+
+Nd i
+tf (w, di )
+tf (w, D)
++ (1 −
+)·
+Ndi
+Ndi + λD
+ND
+
+2
+
+∩ V (qj )| )
+
+I(θqj z > τ1 )I(θvi z > τ2 )
+
+∀qj ∈ Q, |V (qj )| = m
+∀vi ∈ V, n1 ≤ |Q(vi )| ≤ n2
+
+(8)
+
+where Ndi is the number of word tokens in document di ,
+tf (w, di ) is the number of occurring times of word w in di ,
+ND is the number of word tokens in the entire collection,
+and tf (w, D) is the number of occurring times of word w in
+the collection D. λD is the Dirichlet smoothing factor and
+is commonly set according to the average document length
+in the collection [21].
+Our previous work extended LDA and proposed the ACT
+model [19] to generate a topic distribution. By considering
+the learned topic model, we can deﬁne another matching
+score as
+
+j=1
+
+
+
+Ndi
+
+Ndi + λD
+
+(7)
+
+ACT
+Rij
+= p(qj |di ) =
+
+where λ, β and μk are lagrangian multipliers, used to trade
+off the importance of different components in the objective
+function.
+Now the problem is how to deﬁne the topic distribution θ,
+how to calculate the pairwise matching score Rij , and how
+to optimize the framework.
+
+T
+ 
+
+P (w|z, φz )P (z|d, θdi ) (9)
+
+w∈qj z=1
+
+Further, we deﬁne a hybrid matching score by combining
+the two probabilities together
+H
+LM
+ACT
+Rij
+= Rij
+× Rij
+
+36
+
+(10)
+
+E. Optimization Solving
+
+Algorithm 1: Optimization solving algorithm.
+Input: The set of experts V ; the set of queries Q; the
+matching score matrix RM ×N ; the COI matrix
+UM ×N ; Number of expertise level K; m, n1 , n2
+as described above.
+Output: An assignment of experts to queries maximizing
+objective function 7.
+
+To solve the objective function (Eq. 7), we construct a
+convex cost network with lower and upper bounds imposed
+on the arc ﬂows. Figure 1 illustrates the constructing process,
+as described in algorithm 1. Qj indicates a query node and
+Vi indicates an expert node. Qjk indicates query qj being
+assigned to an expert of expertise level k. S and T are two
+virtual nodes(source and sink of the network ﬂow). The edge
+in the constructed network corresponds to the constraints
+we want to impose. Therefore, the problem of ﬁnding the
+optimal match between experts and queries becomes how to
+ﬁnd a feasible conﬁguration to minimize the cost of ﬂow
+in the network. The problem (also referred to as the convex
+cost ﬂow problem) can be solved by transforming it to an
+equivalent minimum cost ﬂow problem [1]. We claim that
+the minimum cost ﬂow of the network gives an optimal
+assignment with respect to (Eq. 7).
+  
+
+   
+
+
+
+
+  
+
+  
+
+ 
+
+
+
+  
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+
+  
+
+
+
+ !
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+1.2
+
+
+
+ !
+
+  
+
+
+ !
+
+Create a network G with source node S and sink node T ;
+foreach qj ∈ Q do
+1.3
+Create K + 1 nodes, denoted as Qj , Qj1 , . . . , QjK
+respectively;
+1.4
+Add an arc from source node S to node Qj , with
+zero cost and ﬂow constraint [m, m];
+1.5
+Add an arc from node Qj to Qjk , with square cost
+function μk f 2 and ﬂow constraint [0, m];
+1.6 end
+1.7 foreach vi ∈ V do
+1.8
+Create a node Vi ;
+1.9
+Add an arc from Vi to sink node T , with square cost
+function βf 2 and ﬂow constraint [n1 , n2 ];
+1.10 end
+1.11 foreach vi ∈ V, qj ∈ Q, s.t. Uij = 1 do
+1.12
+k = expert level of vi ;
+1.13
+Add an arc from Qjk to Vi , with linear cost function
+−(Rij − λIij )f and ﬂow constraint [0, 1];
+1.14 end
+1.15 Compute the minimum cost ﬂow on G;
+1.16 foreach vi ∈ V, qj ∈ Q, s.t. Uij = 1 do
+1.17
+k = expert level of vi ;
+1.18
+if ﬂow f(Qjk , Vi ) = 1 then Assign query qj to
+expert vi ;
+1.19 end
+1.1
+
+ !
+  
+
+T
+(Eq. 7). For simplicity, we use Iij to denote z=1 I(θqj z >
+τ1 )I(θvi z > τ2 ). For the constructing process, we see a
+feasible ﬂow on G is mapping to a query-expert assignment.
+The ﬂow from S to Qj indicates the number of experts
+assigned with query qj , and the ﬂow from Vi to T indicates
+the number of queries assigned to expert vi . And the cost
+between Vi and T is corresponding to the load balance soft
+penalty function (Eq. 4). The meaning of the ﬂow from Qj
+to Qjk is the number of kth-level experts assigned to qj ,
+thus we impose a square cost function μk · f 2 on the arcs
+which is equivalent to the negative of the authority balance
+penalty. The ﬂow from Qjk to Vi means we assign query qj
+to expert vi , it is easy to ﬁnd that no query will be assigned
+to the same expert twice since we give an upper bound of
+1 on the arc, while the cost is equivalent to the negative
+of matching score and topic coverage score. Therefore, our
+problem can be reduced to a equivalent MCCF problem,
+where the objective function of MCCF problem (Eq. 11) is
+the negative form of (Eq. 7).
+In practice, it is not necessary to add all (Qjk , Vi ) arcs.
+To reduce the complexity of the algorithm, we ﬁrst greedily
+generate an assignment and preserve corresponding arcs,
+then keep only c·m arcs for Qjk and c·n2 arcs for Vi which
+have highest matching score (c is a ﬁxed constant). We call
+
+
+
+
+
+
+
+
+
+   
+
+  
+
+
+
+ !
+
+
+
+ 
+
+  
+
+Figure 1. The construction of convex-cost network ﬂow according to
+objective function (Eq. 7). Every arc in the network is associated with
+lower and upper bound [l, u] and a convex function of the arc ﬂow f .
+
+Theorem 1. Algorithm 1 gives an optimal assignment.
+Proof: First, the minimum convex cost ﬂow problem
+(MCCF) can be formulate as an optimization problem:
+Min
+s.t.
+
+
+f (a, b)
+
+
+∀a ∈ V (G), b:(a,b)∈E(G) f (a, b) = b:(b,a)∈E(G) f (b, a)
+
+
+(a,b)∈E(G) Cab
+
+
+
+∀(a, b) ∈ E(G), lab ≤ f (a, b) ≤ uab
+
+(11)
+
+The model is deﬁned on directed network G =
+(V (G), E(G)) with lower bound
+lab, upper bound uab and
+
+a convex cost function Cab f (a, b) associated with every
+arc (a, b).
+Now we prove that minimizing (Eq. 11) on the graph
+G constructed in algorithm 1 is equivalent to maximizing
+
+37
+
+this process Arc-Reduction, which will reduce the number
+of arcs in the network without inﬂuencing the performance
+too much. To process large scale data, we can also leverage
+the parallel implementation of convex cost ﬂow [3].
+
+C must intersect with the shortest path Pback computed on
+line 2.3, since the original G(f ) contains no negative cycle.
+Thus merging C into path Pback will generate a shorter
+path, which contradicts with the assumption that Pback is
+shortest. Therefore, f  has the minimum cost. Accordingly,
+algorithm 2 gives the optimal solution after augmenting a
+new assignment.
+
+F. Online Matching
+After an automatic expertise matching process, the user
+may provide feedbacks. Typically, there are two types of user
+feedbacks: (1) pointing out a mistake match; (2) specifying
+a new match. Online matching aims to adjust the matching result according to the user feedback. One important
+requirement is how to perform the adjustment in real time.
+In our framework, we provide online interactive adjustment
+without recalculating the whole cost ﬂow. For both types
+of feedbacks, we can accomplish online adjustment by
+canceling some ﬂows and augmenting new assignments in
+our framework. We give algorithm 2 to consider the ﬁrst
+type of feedback, which still produces an optimal solution.
+
+III. E XPERIMENTAL R ESULTS
+The proposed approach for expertise matching is very
+general and can be applied to many application to align
+experts and queries. We evaluate the proposed framework on
+two different genres of expertise matching problems: paperreviewer assignment and course-teacher assignment. All data
+sets, code, and detailed results are publicly available.1
+A. Experimental Setting
+Data Sets The paper-reviewer data set consists of 338
+papers and 354 reviewers. The reviewers are program
+committee members of KDD’09 and the 338 papers are
+those published on KDD’08, KDD’09, and ICDM’09. For
+each reviewer, we collect his/her all publications from an
+academic search system Arnetminer2 [20] to generate the
+expertise document. As for the COI problem, we generate
+the COI matrix U according to the coauthor relationship
+in the last ﬁve years and the organization they belong to.
+Finally, we set that a paper should be reviewed by m = 5
+experts, and an expert at most reviews n2 = 10 papers.
+In the course-teacher assignment, we manually crawled
+graduate courses from the department of Computer Science
+(CS) of four top universities, namely CMU, UIUC, Stanford,
+and MIT. In total, there are 609 graduate courses from the
+fall semester in 2008 to 2010 spring, and each course is
+instructed by 1 to 3 teachers. Our intuition is that teachers’
+research interest often match the graduate courses he/she is
+teaching. Thus we still use the teachers’ recent (ﬁve years)
+publications as their expertise documents, while the course
+description and course name are taken as the query.
+On both data sets, we employ topic model [4] to extract
+the topic distribution of each expert and each query. We
+performed topic model learning with the same setting, topic
+number T = 50, α = 50/T , and β = 0.01. The code for
+learning the topic model is also online available.1
+
+Algorithm 2: Online matching algorithm.
+Input: A minimum cost network ﬂow f on G
+corresponding to the current assignment; an
+inappropriate match (vi ,qj ) to be removed.
+Output: A new assignment.
+k = expert level of vi ;
+if f (Qjk , Vi ) = 1 then
+2.3
+Construct the residual network G(f );
+2.4
+Compute the shortest path Pback from T to S on
+G(f ) which contains backward arc (Vi , Qjk );
+2.5
+Cancel(roll back) 1 unit of ﬂow along Pback and
+update G(f );
+2.6
+Remove arc (Qjk , Vi ) from G and update G(f );
+2.7
+Compute shortest augmenting path path Paug from S
+to T ;
+2.8
+Augment 1 unit of ﬂow along Paug ;
+2.9 end
+2.1
+2.2
+
+Lemma 1 (Negative Cycle Optimality Conditions). [1] A
+feasible solution f ∗ is an optimal solution of the minimum
+cost ﬂow problem if and only if it satisﬁes the negative cycle
+optimality conditions: namely, the residual network G(f ∗ )
+contains no negative cost cycle.
+Theorem 2. Algorithm 2 produces an optimal solution in
+the network without assignment (qj , vi ).
+
+Baseline Methods and Evaluation Metrics We employ a greedy algorithm as the baseline. The greedy algorithm assigns experts with highest matching score to each
+query, while keeping the load balance for each expert (i.e.,
+|Q(vi )| ≤ n2 ) and avoiding the conﬂict of interest.
+In the paper-reviewer problem, as there are no standard
+answers, in order to quantitatively evaluate our method, we
+deﬁne the following metrics:
+
+Proof: According to Lemma 1, the residual network
+G(f ) contains no negative cost cycle since the given ﬂow
+f has the minimum cost. In algorithm 2, we remove the
+inappropriate match (vi ,qj ) and adjust the network ﬂow in
+line 2.3-2.5. Denote the feasible ﬂow in the network after
+line 2.5 as f  . According to the SAP (Short Augmenting
+Path) algorithm of cost ﬂow, if f  has the minimum cost(i.e.,
+G(f  ) contains no negative cycle), the algorithm will give
+the optimal solution. We show the optimality of f  by
+contradiction. Assume G(f  ) contains a negative cycle C,
+
+1 http://www.arnetminer.org/expertisematching/
+2 http://arnetminer.org
+
+38
+
+Matching Score (MS): It is deﬁned as the accumulative
+matching score.
+ 
+MS =
+Uij Rij
+
+700
+
+640
+20
+
+400
+300
+200
+
+Soft Penalty
+Basic Network Flow
+Greedy Basline
+
+100
+
+vi ∈V qj ∈Q(vi )
+
+0
+
+Load Variance (LV): It is deﬁned as the variance of the
+number of papers assigned to different reviewers.
+
+2
+M
+M
+
+i=1 |Q(vi )|
+LV =
+|Q(vi )| −
+M
+i=1
+
+0
+
+0.005
+
+0.01
+β
+
+0.015
+
+15
+
+10
+Soft Penalty
+Basic Network Flow
+Greedy Baseline
+
+5
+
+0
+
+0.02
+
+620
+Matching Score
+
+500
+
+Load Variance
+
+Matching Score
+
+600
+
+0
+
+0.005
+
+(a)
+
+0.01
+β
+
+600
+580
+560
+Soft Penalty
+Strict Constraint
+
+540
+0.015
+
+520
+0
+
+0.02
+
+5
+
+10
+15
+Load Variance
+
+(b)
+
+20
+
+25
+
+(c)
+
+Figure 2. Figure (a) and (b) illustrate how soft penalty function inﬂuences
+the matching score(MS) and load variance with different β respectively.
+Figure (c) gives a comparison between soft penalty function and strict
+constraint methods towards load balance.
+
+Expertise Variance (EV): It is deﬁned as the variance of the
+number of top level reviewers assigned to different papers.
+
+N
+2
+N
+1
+
+j=1 |V (qj ) ∩ V |
+1
+|V (qj ) ∩ V | −
+EV =
+N
+j=1
+
+640
+
+1.8
+1.6
+Authority Balance
+Basic Network Flow
+Greedy Basline
+
+600
+
+580
+
+560
+
+In the course-teacher assignment experiment, we extract
+the real assignment as the ground-truth, thus we perform the
+evaluation in terms of Precision.
+
+Authority Balance
+Basic Network Flow
+Greedy Basline
+
+1.4
+Expertise Variance
+
+Matching Score
+
+620
+
+1.2
+1
+0.8
+0.6
+0.4
+0.2
+
+540
+
+Experiment Setting We tune the different parameters
+to analyze the inﬂuence on the accumulative matching
+score. We also evaluate the efﬁciency performance of our
+proposed approach. All the experiments are carried out on
+a PC running Windows XP with Intel Core2 Quad CPU
+Q9550(2.83GHz), 3.2G RAM.
+
+0
+
+Figure 3.
+varied.
+
+0.005
+
+0.01
+
+μ
+
+0.015
+
+0.02
+
+0.025
+
+0
+
+0.005
+
+0.01
+
+1
+
+μ
+
+(a)
+
+(b)
+
+0.015
+
+0.02
+
+0.025
+
+1
+
+Matching score (MS) and expertise variance (EV) with μ1
+
+obtained in each step. We see that the load balance constraint
+will reduce the expertise matching score, while the other
+constraints have little negative effect. This is because senior
+experts are often good at many aspects, thus assigned with
+heavy load in traditional matching. In out approach the
+decrease of matching score in the load balance constraint
+is to balance the work load of senior experts.
+
+B. Experiment Results
+Paper-reviewer Assignment Experiment In the experiment, we ﬁrst set μ = 0 and tune the parameter β to ﬁnd out
+the effects of soft penalty function. Figure 2 (a) illustrates
+how soft penalty function inﬂuences the matching score
+with different β. We see that the matching score decreases
+slightly with β increasing. Figure 2 (b) shows the effects of
+load variance with β varied. We see that the load variance
+changes very fast toward balance.
+In ﬁgure 2 (c), we compare the two different methods
+to achieve load balance, namely, strict constraint and soft
+penalty. The two LV-MS curves are respectively generated by setting different minimum numbers n1 for strict
+constraint and varying the weight parameter β for soft
+load balance penalty. The curves show that soft penalty
+outperforms strict constraint towards load balance.
+Then we set β to 0 to test the effects of authority balance.
+Experts are divided into 2 levels base on their H-index, and
+we set μ2 = 0 to consider the balance of the senior reviewers
+only. Figure 3 presents the accumulative matching score (a)
+and expertise variance (b) with μ1 varied.
+Further, we analyze the effects of different constraints.
+Speciﬁcally, we ﬁrst remove all constraints (using Eq. (1)
+only), and then add the constraints one by one in the order
+(Load balance, Authority balance, Topic coverage, and COI).
+In each step, we perform expertise matching using our
+approach. Table II lists the accumulative matching score
+
+Table II
+E FFECTS OF DIFFERENT CONSTRAINTS ON MATCHING SCORE .
+Constraint
+Basic objective function (Eq. 1)
++ Load Balance soft penalty with β = 0.02
++ Authority Balance with μ = (0.02, 0)T
++ Topic Coverage with τ1 = τ2 = 0.08, λ = 0.1
++ COI
+
+Matching Score
+635.51
+592.83
+599.37
+599.37
+590.14
+
+Finally, we evaluate the efﬁciency performance of the proposed algorithm. We compare the CPU time of the original
+optimal algorithm and the version with Arc-Reduction. As
+shown in Figure 4, the Arc-Reduction process can significantly reduce the time consumption. For example, when
+setting c = 12 in this problem, we can achieve a > 3×
+speedup without any loss in matching score.
+We further use a case study (as shown in table III and IV)
+to demonstrate the effectiveness of our approach. We see that
+the result is reasonable. For example, Lise Getoor, whose
+research interests include relational learning, is assigned
+with a lot of papers about social network.
+Course-Teacher Assignment Experiment Figure 5 (a)
+shows the assignment precision in the course-teacher assignment task by our approach and the baseline method, and
+
+39
+
+Table IV
+L IST OF REVIEWERS FOR 5 RANDOM PAPERS .
+Paper
+Assigned reviewers
+Audience selection for on-line brand advertising: privacy-friendly social network targeting C. Lee Giles, Jie Tang, Matthew Richardson, Hady Wirawan Lauw, Elena Zheleva
+Partitioned Logistic Regression for Spam Filtering
+Rong Jin, Chengxiang Zhai, Saharon Rosset, Masashi Sugiyama, Annalisa Appice
+Structured Learning for Non-Smooth Ranking Losses
+Xian-sheng Hua, Tie-yan Liu, Hang Li, Yunbo Cao, Lorenza Saitta
+Unsupervised deduplication using cross-ﬁeld dependencies
+Chengxiang Zhai, Deepak Agarwal, Max Welling, Donald Metzler, Oren Kurland
+The structure of information pathways in a social communication network
+C. Lee Giles, Wolfgang Nejdl, Melanie Gnasa, Michalis Faloutsos,Cameron Marlow
+
+Table V
+C ASE STUDY: PROFESSORS WITH MANY COURSES ASSIGNED IN UIUC(2008, FALL - 2010, SPRING )
+Professor
+
+Pub Papers
+
+Jose Meseguer
+
+237
+
+ChengXiang Zhai
+
+117
+
+Courses assigned(baseline)
+23 courses
+Database Systems (2008,spring)
+Programming Languages and Compilers (2008,spring)
+Iterative and Multigrid Methods (2009,spring)
+Programming Languages and Compilers (2009,spring)
+18 courses
+Computer Vision (2009,spring)
+Text Information Systems (2009,spring)
+Stochastic Processes and Applic (2009,fall)
+Computer Vision (2008,spring)
+
+650
+
+approach increases in general and decreases slowly after it
+exceeds the peak value. The peak value is more than 50
+percents larger than the initial precision, which validates the
+effectiveness of the soft penalty approach.
+
+40
+
+CPU Time(sec)
+
+Matching Score
+
+CPU Time
+Matching Score
+
+600
+
+Courses assigned(our approach)
+7 courses
+Programming Languages and Compilers (2008,spring)
+Programming Language Semantics (2008,spring)
+Programming Languages and Compilers (2008,fall)
+Programming Languages and Compilers (2009,spring)
+7 courses
+Text Information Systems (2008,spring)
+Stochastic Processes and Applic (2008,fall)
+Text Information Systems (2009,spring)
+Stochastic Processes and Applic (2009,fall)
+
+20
+
+0.5
+
+0.4
+Greedy Baseline
+Our Algorithm
+
+0.35
+
+Our Algorithm
+Greedy Basline
+
+0.45
+0.4
+
+c
+
+8
+
+10
+
+12
+
+0
+N/A
+
+0.3
+
+Efﬁciency performance (s).
+
+Assignment Precision
+
+Figure 4.
+
+5
+
+Assignment Precision
+
+550
+0 1 2
+
+0.25
+0.2
+0.15
+
+0.35
+0.3
+0.25
+0.2
+0.15
+
+0.1
+
+0.1
+
+Table III
+
+0.05
+
+E XAMPLE ASSIGNED PAPERS TO THREE REVIEWERS .
+
+0
+
+Reviewer
+
+Assigned papers
+Evaluating Statistical Tests for Within-Network Classiﬁers of ...
+Discovering Organizational Structure in Dynamic Social Network
+Connections between the lines: augmenting social networks with text
+Lise Getoor
+MetaFac: community discovery via relational hypergraph factorization
+Relational learning via latent social dimensions
+Inﬂuence and Correlation in Social Networks
+Mining Data Streams with Labeled and Unlabeled Training Examples
+Vague One-Class Learning for Data Streams
+Active Selection of Sensor Sites in Remote Sensing Applications
+Wei Fan
+Name-ethnicity classiﬁcation from open sources
+Consensus group stable feature selection
+Categorizing and mining concept drifting data streams
+Co-evolution of social and afﬁliation networks
+Inﬂuence and Correlation in Social Networks
+Jie Tang
+Feedback Effects between Similarity and Social Inﬂuence ...
+Mobile call graphs : beyond power-law and lognormal distributions
+Audience selection for on-line brand advertising: privacy-friendly ...
+
+0.05
+CMU
+
+UIUC
+
+Stanford
+
+MIT
+
+(a) Course assignment results
+
+Figure 5.
+
+0
+
+0
+
+2
+
+4
+
+6
+
+β
+
+8
+
+10
+
+12
+
+14
+
+16
+−3
+
+x 10
+
+(b) Precision vs. β on UIUC data
+
+Course-Teacher Assignment performance(%).
+
+We conduct a further analysis on the UIUC data set. As
+Table V shows, some professors with publications in various
+domains, are likely to be assigned with many courses in the
+baseline algorithm. But in real situation, most professors,
+though with various background, want to focus on several
+directions. Thus some courses should be assigned to younger
+teachers. While in our algorithm, the situation is much
+better. And we can see that each teacher is assigned with
+a reasonable load as well as a centralized interest.
+C. Online System
+
+(b) shows the effects of the parameter β on the precision
+on UIUC data. The precision is deﬁned as the ratio of the
+number of correct assignments(consistent with the ground
+truth data) over total number of assignments. As Figure 5 (a)
+shows, in all the data sets we collect from top universities,
+our algorithm outperforms the greedy method greatly. And
+in Figure 5 (b), as the β increases, the precision of our
+
+Based on the proposed method, we have developed an
+online system for paper-reviewer suggestions, which is available at 3 . Figure 6 shows an screenshot of the system. The
+input is a list of papers (with titles, abstracts, authors, and
+organization of each author) and a list of conference program
+3 http:/review.arnetminer.org/
+
+40
+
+[4] D. M. Blei, A. Y. Ng, and M. I. Jordan. Latent dirichlet
+allocation. Journal of Machine Learning Research, 3:993–
+1022, 2003.
+[5] D. Conry, Y. Koren, and N. Ramakrishnan. Recommender
+systems for the conference paper assignment problem. In
+RecSys’09, pages 357–360, 2009.
+[6] S. T. Dumais and J. Nielsen. Automating the assignment
+of submitted manuscripts to reviewers. In SIGIR’92, pages
+233–244, 1992.
+[7] H. Fang and C. Zhai. Probabilistic models for expert ﬁnding.
+In ECIR’07, pages 418–430, 2007.
+Figure 6.
+
+Screenshot of the online system.
+
+[8] T. L. Grifﬁths and M. Steyvers. Finding scientiﬁc topics. In
+PNAS’04, pages 5228–5235, 2004.
+
+committee (PC) members. We use the academic information
+stored in ArnetMtiner to ﬁnd the topic distribution for each
+paper and each PC member [20]. With the two input lists
+and the topic distribution, the system automatically ﬁnds the
+match between papers and authors. As shown in Figure 6,
+there are 5-7 papers assigned to each PC member and the
+number of reviewers for each paper is set as 3. The system
+will also avoid the conﬂict-of-interest (COI) according to
+the coauthorship and co-organization relationship. In addition, users can provide feedbacks for online adjustment, by
+removing or conﬁrm (ﬁx) an assignment.
+
+[9] D. Hartvigsen, J. C. Wei, and R. Czuchlewski. The conference paper-reviewer assignment problem. Decision Sciences,
+30(3):865–876, 1999.
+[10] C. B. Haym, H. Hirsh, W. W. Cohen, and C. Nevill-manning.
+Recommending papers by mining the web. In IJCAI’99, pages
+1–11, 1999.
+[11] S. Hettich and M. J. Pazzani. Mining for proposal reviewers: lessons learned at the national science foundation. In
+KDD’06, pages 862–871, 2006.
+[12] T. Hofmann. Probabilistic latent semantic indexing.
+SIGIR’99, pages 50–57, 1999.
+
+IV. C ONCLUSION AND F UTURE W ORK
+
+In
+
+In this paper, we studied the problem of expertise matching in a constraint-based framework. We formalized the
+problem as a minimum convex cost ﬂow problem. We
+theoretically proved that the proposed approach can achieve
+an optimal solution and developed an efﬁcient algorithm to
+solve it. Experimental results on two different types of data
+sets demonstrate that the proposed approach can effectively
+and efﬁciently match experts with the queries. Also we
+present an algorithm to optimize the framework according
+to user feedbacks in real time. We are also going to apply
+the proposed method to several real-world applications.
+
+[13] M. Karimzadehgan and C. Zhai. Constrained multi-aspect
+expertise matching for committee review assignment. In
+CIKM’09, pages 1697–1700, 2009.
+
+ACKNOWLEDGMENT
+
+[17] D. Petkova and W. B. Croft. Hierarchical language models
+for expert ﬁnding in enterprise corpora. International Journal
+on Artiﬁcial Intelligence Tools.
+
+[14] M. Karimzadehgan, C. Zhai, and G. Belford. Multi-aspect
+expertise matching for review assignment. In CIKM’08, pages
+1113–1122, 2008.
+[15] N. D. Mauro, T. M. A. Basile, and S. Ferilli. Grape: An
+expert review assignment component for scientiﬁc conference
+management systems. In IEA/AIE’05, pages 789–798, 2005.
+[16] D. Mimno and A. McCallum. Expertise modeling for matching papers with reviewers. In KDD’07, pages 500–509, 2007.
+
+The work is supported by the Natural Science Foundation
+of China (No. 60703059, No. 60973102), Chinese National
+Key Foundation Research (No. 60933013), National Hightech R&D Program (No. 2009AA01Z138).
+
+[18] Y.-H. Sun, J. Ma, Z.-P. Fan, and J. Wang. A hybrid knowledge
+and model approach for reviewer assignment. In HICSS’07,
+pages 47–47, 2007.
+
+R EFERENCES
+[1] R. K. Ahuja, T. L. Magnanti, and J. B. Orlin. Network Flows:
+Theory, Algorithms, and Applications. Prentice Hall, 1993.
+
+[19] J. Tang, R. Jin, and J. Zhang. A topic modeling approach and
+its integration into the random walk framework for academic
+search. In ICDM’08, pages 1055–1060, 2008.
+
+[2] K. Balog, L. Azzopardi, and M. de Rijke. Formal models for
+expert ﬁnding in enterprise corpora. In SIGIR’2006, pages
+43–55, 2006.
+
+[20] J. Tang, J. Zhang, L. Yao, J. Li, L. Zhang, and Z. Su. Arnetminer: Extraction and mining of academic social networks.
+In KDD’08, pages 990–998, 2008.
+
+[3] P. Beraldi, F. Guerriero, and R. Musmanno. Parallel algorithms for solving the convex minimum cost ﬂow problem.
+Computational Optimization and Applications, 18(2):175–
+190, 2001.
+
+[21] C. Zhai and J. Lafferty. A study of smoothing methods for
+language models applied to ad hoc information retrieval. In
+SIGIR’01, pages 334–342, 2001.
+
+41
+
+

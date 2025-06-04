@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+streamlit
+pydantic
+scikit-learn
+nltk
+spacy
+pandas
+numpy
+python-multipart
+requests
+plotly
+wordcloud
+textblob
