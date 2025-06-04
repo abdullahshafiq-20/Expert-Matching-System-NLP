@@ -108,7 +108,3 @@ The system evaluates matches based on:
 ## References
 
 - Tang, W., Tang, J., & Tan, C. (2010). Expertise Matching via Constraint-based Optimization. IEEE/WIC/ACM International Conference on Web Intelligence and Intelligent Agent Technology.
-
-## License
-
-[Add your license information here] 
